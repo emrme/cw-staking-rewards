@@ -1,7 +1,7 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Addr, Decimal};
 use cw20::Cw20ReceiveMsg;
-use schemars::JsonSchema;
+// use schemars::JsonSchema;
 // use serde::{Deserialize, Serialize};
 
 #[cw_serde]
