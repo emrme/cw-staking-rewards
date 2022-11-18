@@ -1,5 +1,3 @@
-use std::ops::Add;
-
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
@@ -7,9 +5,7 @@ use cosmwasm_std::{to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Res
 
 use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
-
-use crate::state::{CONFIG, STAKERS, TOTAL_STAKED};
-
+use crate::query::*;
 /*
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:cw-yield-farming";
@@ -48,31 +44,6 @@ pub fn query(_deps: Deps, _env: Env, _msg: QueryMsg) -> StdResult<Binary> {
         TotalStaked {} => query_total_staked(_deps),
         RewardRate {} => query_reward_rate(_deps),
     }
-}
-
-fn query_staker_info(deps: Deps, staker: Addr) -> StdResult<Binary> {
-    let info = STAKERS.load(deps.storage, &staker)?;
-    to_binary(&info)
-}
-
-fn query_staking_token(deps: Deps) -> StdResult<Binary> {
-    let config = CONFIG.load(deps.storage)?;
-    to_binary(&config.staking_token)
-}
-
-fn query_reward_token(deps: Deps) -> StdResult<Binary> {
-    let config = CONFIG.load(deps.storage)?;
-    to_binary(&config.reward_token)
-}
-
-fn query_total_staked(deps: Deps) -> StdResult<Binary> {
-    let total_staked = TOTAL_STAKED.load(deps.storage)?;
-    to_binary(&total_staked)
-}
-
-fn query_reward_rate(deps: Deps) -> StdResult<Binary> {
-    let config = CONFIG.load(deps.storage)?;
-    to_binary(&config.reward_rate)
 }
 
 #[cfg(test)]
