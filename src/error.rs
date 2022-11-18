@@ -15,6 +15,9 @@ pub enum ContractError {
 
     #[error("Invalid amount")]
     InvalidAmount,
+
+    #[error("Invalid staking token")]
+    InvalidStakingToken,
 }
 
 // impl From<StdError> for ContractError {

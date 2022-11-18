@@ -23,20 +23,20 @@ pub fn instantiate(
     _msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
     let config = Config {
-        owner: _info.sender.clone(),
+        admin: _info.sender.clone(),
         staking_token: _deps.api.addr_validate(&_msg.staking_token)?,
         reward_token: _deps.api.addr_validate(&_msg.reward_token)?,
-        reward_duration: Uint64::new(_msg.reward_duration),
-        reward_rate: _msg.reward_rate,
+        reward_amount: _msg.reward_amount,
+        reward_duration: _msg.reward_duration,
+        staking_start_time: env.block.time.seconds(),
     };
 
     set_contract_version(_deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
 
     CONFIG.save(_deps.storage, &config)?;
-    TOTAL_STAKED.save(_deps.storage, &Uint128::new(0))?;
 
     Ok(Response::new()
-        .add_attribute("method", "instantiate")
+        .add_attribute("action", "instantiate")
         .add_attribute("sender", _info.sender))
 }
 
@@ -50,9 +50,15 @@ pub fn execute(
     // use ExecuteMsg::*;
     match _msg {
         ExecuteMsg::Receive(receive_msg) => Ok(Response::new()),
-        ExecuteMsg::Unstake { amount } => Ok(Response::new()),
-        ExecuteMsg::ClaimRewards {} => Ok(Response::new()),
-        ExecuteMsg::UpdateRewardRate { new_reward_rate } => Ok(Response::new()),
+        ExecuteMsg::Stake { amount } => execute_stake(_deps, _env, _info, amount),
+        ExecuteMsg::Withdraw { amount } => execute_withdraw(_deps, _env, _info, amount),
+        ExecuteMsg::ClaimReward {} => execute_claim_reward(_deps, _env, _info),
+        ExecuteMsg::SetRewardAmount { amount } => {
+            execute_set_reward_amount(_deps, _env, _info, amount)
+        }
+        ExecuteMsg::SetRewardDuration { duration } => {
+            execute_set_reward_duration(_deps, _env, _info, _duration)
+        }
     }
 }
 

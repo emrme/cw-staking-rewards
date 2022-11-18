@@ -1,5 +1,5 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
-use cosmwasm_std::{Addr, Decimal};
+use cosmwasm_std::{Addr, Decimal, Uint128, Uint64};
 use cw20::Cw20ReceiveMsg;
 // use schemars::JsonSchema;
 // use serde::{Deserialize, Serialize};
@@ -8,31 +8,25 @@ use cw20::Cw20ReceiveMsg;
 pub struct InstantiateMsg {
     pub staking_token: String,
     pub reward_token: String,
-    pub reward_rate: Decimal,
-    pub reward_duration: u64,
+    pub reward_amount: Uint128,
+    pub reward_duration: Uint64,
 }
 
 #[cw_serde]
 pub enum ExecuteMsg {
+    Stake { amount: Uint128 },
+    Withdraw { amount: Uint128 },
+    ClaimReward {},
+    SetRewardAmount { amount: Decimal },
+    SetRewardDuration { duration: Uint64 },
     Receive(Cw20ReceiveMsg),
-    Unstake { amount: u128 },
-    ClaimRewards,
-    UpdateRewardRate { new_reward_rate: Decimal },
 }
 
 #[cw_serde]
 #[derive(QueryResponses)]
 pub enum QueryMsg {
     #[returns(StakerInfoResponse)]
-    StakerInfo { staker: String },
-    #[returns(StakingTokenResponse)]
-    StakingToken,
-    #[returns(RewardTokenResponse)]
-    RewardToken,
-    #[returns(TotalStakedResponse)]
-    TotalStaked,
-    #[returns(RewardRateResponse)]
-    RewardRate,
+    GetConfig {},
 }
 
 #[cw_serde]
@@ -45,19 +39,4 @@ pub struct StakerInfoResponse {
 #[cw_serde]
 pub struct StakingTokenResponse {
     pub staking_token: Addr,
-}
-
-#[cw_serde]
-pub struct RewardTokenResponse {
-    pub reward_token: Addr,
-}
-
-#[cw_serde]
-pub struct TotalStakedResponse {
-    pub total_staked: u128,
-}
-
-#[cw_serde]
-pub struct RewardRateResponse {
-    reward_rate: Decimal,
 }

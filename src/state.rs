@@ -4,11 +4,12 @@ use cw_storage_plus::{Item, Map};
 
 #[cw_serde]
 pub struct Config {
-    pub owner: Addr,
+    pub admin: Addr,
     pub staking_token: Addr,
     pub reward_token: Addr,
-    pub reward_rate: Decimal,
+    pub reward_amount: Decimal,
     pub reward_duration: Uint64,
+    pub staking_start_time: Uint64,
 }
 
 pub const CONFIG: Item<Config> = Item::new("config");
