@@ -6,9 +6,8 @@ use cw20::Cw20ReceiveMsg;
 
 #[cw_serde]
 pub struct InstantiateMsg {
-    pub owner: Addr,
-    pub staking_token: Addr,
-    pub reward_token: Addr,
+    pub staking_token: String,
+    pub reward_token: String,
     pub reward_rate: Decimal,
     pub reward_duration: u64,
 }
@@ -25,7 +24,7 @@ pub enum ExecuteMsg {
 #[derive(QueryResponses)]
 pub enum QueryMsg {
     #[returns(StakerInfoResponse)]
-    StakerInfo { staker: Addr },
+    StakerInfo { staker: String },
     #[returns(StakingTokenResponse)]
     StakingToken,
     #[returns(RewardTokenResponse)]
