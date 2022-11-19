@@ -29,3 +29,12 @@ pub enum ContractError {
 //         }
 //     }
 // }
+
+impl From<serde_json::Error> for ContractError {
+    fn from(err: serde_json::Error) -> Self {
+        ContractError::Std(StdError::generic_err(format!(
+            "JSON deserialization error: {}",
+            err
+        )))
+    }
+}

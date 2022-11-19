@@ -1,24 +1,51 @@
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::{Addr, Decimal, Uint128, Uint64};
+
+use cosmwasm_std::{Addr, Uint128, Uint64};
 use cw_storage_plus::{Item, Map};
 
 #[cw_serde]
 pub struct Config {
-    pub admin: Addr,
     pub staking_token: Addr,
     pub reward_token: Addr,
-    pub reward_amount: Decimal,
-    pub reward_duration: Uint64,
-    pub staking_start_time: Uint64,
+    pub admin: Addr,
+    pub reward_rate: Uint64,
+    pub last_update_time: Uint64,
+    pub total_staked: Uint128,
+}
+
+impl Config {
+    pub fn new(
+        staking_token: Addr,
+        reward_token: Addr,
+        admin: Addr,
+        reward_rate: Uint64,
+    ) -> Config {
+        Config {
+            staking_token,
+            reward_token,
+            admin,
+            reward_rate,
+            last_update_time: Uint64::zero(),
+            total_staked: Uint128::zero(),
+        }
+    }
+}
+#[cw_serde]
+pub struct UserState {
+    pub staked_amount: Uint128,
+    pub reward: Uint128,
+    pub reward_per_token_paid: Uint128,
+}
+
+impl Default for UserState {
+    fn default() -> Self {
+        UserState {
+            staked_amount: Uint128::zero(),
+            reward: Uint128::zero(),
+            reward_per_token_paid: Uint128::zero(),
+        }
+    }
 }
 
 pub const CONFIG: Item<Config> = Item::new("config");
-
-#[cw_serde]
-pub struct StakerInfo {
-    pub staked_amount: Uint128,
-    pub last_claim: Uint64,
-}
-
-pub const STAKERS: Map<&Addr, StakerInfo> = Map::new("stakers");
-pub const TOTAL_STAKED: Item<Uint128> = Item::new("total_staked");
+pub const USER_STATES: Map<Addr, UserState> = Map::new("user_states");
