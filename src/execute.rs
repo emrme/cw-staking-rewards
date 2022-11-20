@@ -18,8 +18,11 @@ pub fn execute_stake(
     let mut config = CONFIG.load(deps.storage)?;
 
     update_rewards(deps.branch(), &env)?;
+    update_rewards_for_user(deps.branch(), &env, &info.sender.to_string())?;
 
-    let mut user_state = USER_STATES.load(deps.storage, info.sender.clone())?;
+    let mut user_state = USER_STATES
+        .may_load(deps.storage, info.sender.clone())?
+        .unwrap_or_default();
 
     user_state.staked_amount += amount;
 
@@ -72,7 +75,9 @@ pub fn execute_claim_reward(
 ) -> Result<Response, ContractError> {
     update_rewards(deps.branch(), &env)?;
 
-    let mut user_state = USER_STATES.load(deps.storage, info.sender.clone())?;
+    let mut user_state = USER_STATES
+        .may_load(deps.storage, info.sender.clone())?
+        .unwrap_or_default();
     let reward = user_state.reward;
     user_state.reward = Uint128::zero();
     USER_STATES.save(deps.storage, info.sender.clone(), &user_state)?;
@@ -122,14 +127,10 @@ pub fn execute_receive(
         ))),
     }
 }
-
 pub fn update_rewards(deps: DepsMut, env: &Env) -> StdResult<()> {
     let mut config: Config = CONFIG.load(deps.storage)?;
 
     let current_time: Uint128 = env.block.time.seconds().into();
-
-    // let time_since_last_update: Uint128 = current_time - config.last_update_time.into();
-
     let time_since_last_update: Uint128 = current_time - Uint128::from(config.last_update_time);
 
     let reward_amount: Uint128 = time_since_last_update * Uint128::from(config.reward_rate);
@@ -148,14 +149,21 @@ pub fn update_rewards_for_user(mut deps: DepsMut, env: &Env, user: &str) -> StdR
     let user_addr = deps.api.addr_validate(user)?;
 
     let config: Config = CONFIG.load(deps.storage)?;
-    let mut user_state: UserState = USER_STATES.load(deps.storage, user_addr.clone())?;
-    let reward_per_token = config.total_staked;
+    let mut user_state: UserState = USER_STATES
+        .may_load(deps.storage, user_addr.clone())?
+        .unwrap_or_default();
+
+    let time_since_last_update: Uint128 =
+        Uint128::from(env.block.time.seconds()) - Uint128::from(config.last_update_time);
+
+    let reward_per_token =
+        (Uint128::from(config.reward_rate) * time_since_last_update) / config.total_staked;
+
     let rewards_diff = reward_per_token - user_state.reward_per_token_paid;
 
     if rewards_diff > Uint128::zero() {
-        let user_reward =
-            (user_state.staked_amount.u128() * rewards_diff.u128()) / config.total_staked.u128();
-        user_state.reward = user_state.reward + Uint128::from(user_reward);
+        let user_reward = user_state.staked_amount * rewards_diff;
+        user_state.reward = user_state.reward + user_reward;
     }
 
     user_state.reward_per_token_paid = reward_per_token;

@@ -29,6 +29,8 @@ pub enum QueryMsg {
     UserInfo { user: String },
     #[returns(RewardInfoResponse)]
     RewardInfo { user: String },
+    #[returns(RewardParametersResponse)]
+    RewardParameters {},
 }
 
 #[cw_serde]
@@ -47,4 +49,10 @@ pub struct ConfigResponse {
     pub reward_token: Addr,
     pub admin: Addr,
     pub reward_rate: Uint64,
+}
+
+#[cw_serde]
+pub struct RewardParametersResponse {
+    pub reward_rate: Uint64,
+    pub last_update_time: Uint64,
 }

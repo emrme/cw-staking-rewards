@@ -62,8 +62,6 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::Config {} => query_config(deps),
         QueryMsg::UserInfo { user } => query_user_info(deps, user),
         QueryMsg::RewardInfo { user } => query_reward_info(deps, env, user),
+        QueryMsg::RewardParameters {} => query_reward_parameters(deps),
     }
 }
-
-#[cfg(test)]
-mod tests {}

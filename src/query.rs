@@ -46,3 +46,13 @@ pub fn query_reward_info(deps: Deps, env: Env, user: String) -> StdResult<Binary
 
     to_binary(&response)
 }
+
+pub fn query_reward_parameters(deps: Deps) -> StdResult<Binary> {
+    let config: Config = CONFIG.load(deps.storage)?;
+    let response = RewardParametersResponse {
+        reward_rate: config.reward_rate,
+        last_update_time: config.last_update_time,
+    };
+
+    to_binary(&response)
+}
